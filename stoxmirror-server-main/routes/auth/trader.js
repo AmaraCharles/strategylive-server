@@ -33,7 +33,7 @@ const Trader = mongoose.model('Trader', {
 
 
 
-router.post("/register", async (req, res) => {
+router.post("/trader/register", async (req, res) => {
     const {name,
       frequency,
       risk,
