@@ -1,32 +1,35 @@
-var createError = require("http-errors");
-var express = require("express");
+// Core Dependencies
+const express = require("express");
 const mongoose = require("mongoose");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
 
-var indexRouter = require("./routes/index");
-var loginAuthRouter = require("./routes/auth/login");
-var verifyAuthRouter = require("./routes/auth/verify-email");
-var registerAuthRouter = require("./routes/auth/register");
-var forgotPasswordAuthRouter = require("./routes/auth/forgot-password");
-var kycAuthRouter = require("./routes/auth/kyc");
-var traderAuthRouter = require("./routes/auth/trader");
-var transactionsRouter = require("./routes/transactions");
+// Route Files
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
+const loginAuthRouter = require("./routes/auth/login");
+const verifyAuthRouter = require("./routes/auth/verify-email");
+const registerAuthRouter = require("./routes/auth/register");
+const forgotPasswordAuthRouter = require("./routes/auth/forgot-password");
+const kycAuthRouter = require("./routes/auth/kyc");
+const traderAuthRouter = require("./routes/auth/trader");
+const transactionsRouter = require("./routes/transactions");
 
-var usersRouter = require("./routes/users");
+// App Initialization
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-var app = express();
-var PORT = process.env.PORT || 8080;
-
+// Middleware
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
 
+// Routes
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/auth", loginAuthRouter);
@@ -35,26 +38,22 @@ app.use("/auth", registerAuthRouter);
 app.use("/auth", forgotPasswordAuthRouter);
 app.use("/auth", kycAuthRouter);
 app.use("/auth/trader", traderAuthRouter);
-
 app.use("/transactions", transactionsRouter);
 
-// database setup
+// MongoDB Connection
 mongoose.connect(process.env.DB_CONNECTION_STRING, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
 const db = mongoose.connection;
 
-db.on("error", () => {
-  console.log("Database connection error");
-});
+db.on("error", () => console.error("❌ Database connection error"));
+db.once("open", () => console.log("✅ Database connected successfully"));
 
-db.on("open", () => {
-  console.log("Database connected successfully");
-});
-
+// Start Server
 app.listen(PORT, () => {
-  console.log("App is running on port: ", PORT);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
 
 module.exports = app;
