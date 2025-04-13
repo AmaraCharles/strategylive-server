@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const UsersDatabase = require("../../models/User");
+
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require("uuid");
 
@@ -31,7 +33,7 @@ const TraderSchema = new mongoose.Schema({
 const Trader = mongoose.model('Trader', TraderSchema);
 
 // Register new trader
-router.post("/trader/registert", async (req, res) => {
+router.post("/register", async (req, res) => {
   const {
     name,
     frequency,

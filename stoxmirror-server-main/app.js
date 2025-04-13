@@ -11,11 +11,12 @@ dotenv.config();
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const loginAuthRouter = require("./routes/auth/login");
+const traderAuthRouter = require("./routes/auth/trader");
+
 const verifyAuthRouter = require("./routes/auth/verify-email");
 const registerAuthRouter = require("./routes/auth/register");
 const forgotPasswordAuthRouter = require("./routes/auth/forgot-password");
 const kycAuthRouter = require("./routes/auth/kyc");
-const traderAuthRouter = require("./routes/auth/trader");
 const transactionsRouter = require("./routes/transactions");
 
 // App Initialization
