@@ -37,7 +37,7 @@ app.use("/auth", verifyAuthRouter);
 app.use("/auth", registerAuthRouter);
 app.use("/auth", forgotPasswordAuthRouter);
 app.use("/auth", kycAuthRouter);
-app.use("/auth/trader", traderAuthRouter);
+app.use("/auth", traderAuthRouter);
 app.use("/transactions", transactionsRouter);
 
 // MongoDB Connection
