@@ -31,7 +31,7 @@ const TraderSchema = new mongoose.Schema({
 const Trader = mongoose.model('Trader', TraderSchema);
 
 // Register new trader
-router.post("/registert", async (req, res) => {
+router.post("trader/registert", async (req, res) => {
   const {
     name,
     frequency,
