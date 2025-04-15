@@ -26,7 +26,7 @@ const TraderSchema = new mongoose.Schema({
   range: String,
   followers: String,
   history: Array,
-  trades: Array,
+  trades: String,
 });
 
 // Create the Trader model
@@ -87,7 +87,7 @@ router.post("/register", async (req, res) => {
       range,
       followers,
       history: history || [],
-      trades: trades || [],
+      trades,
     };
 
     const createdUser = await Trader.create(newTrader);
