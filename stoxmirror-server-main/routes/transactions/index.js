@@ -153,7 +153,7 @@ router.post("/:_id/auto", async (req, res) => {
 
     await user.updateOne({
       planHistory: [
-        ...user.planHistory,
+        ...user.plan,
         {
           _id: uuidv4(),
           subname:copysubname,
