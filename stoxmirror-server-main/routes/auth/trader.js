@@ -172,4 +172,32 @@ router.put("/:_id/profile/update", async (req, res) => {
   }
 });
 
+
+//update signals history
+router.put("/:_id/signals", async (req, res) => {
+  const { _id } = req.params;
+
+  try {
+    const user = await Trader.findById(_id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Trader not found" });
+    }
+
+    // Push new history data from request body to the user's history array
+    user.history.push(req.body);
+
+    // Save the updated user
+    await user.save();
+
+    return res.status(200).json({
+      message: "Update was successful",
+    });
+  } catch (error) {
+    console.error("Update error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 module.exports = router;
