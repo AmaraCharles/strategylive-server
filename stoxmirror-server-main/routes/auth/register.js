@@ -20,7 +20,14 @@ function generateReferralCode(length) {
 
 router.post("/register", async (req, res) => {
   const { firstName, lastName, email, password, country, referralCode,phone} = req.body;
+ // Generate OTP
+ const otp = speakeasy.totp({
+  secret: process.env.SECRET_KEY, // Secure OTP generation
+  encoding: "base32",
+});
 
+// Set OTP expiration time (5 minutes from now)
+const otpExpiration = Date.now() + (5 * 60 * 1000); // 5 minutes in milliseconds
   try {
     // Check if any user has that email
     const user = await UsersDatabase.findOne({ email });
@@ -106,8 +113,13 @@ router.post("/register", async (req, res) => {
     const token = uuidv4();
     sendWelcomeEmail({ to: email, token });
 userRegisteration({firstName,email});
-
-    return res.status(200).json({ code: "Ok", data: createdUser });
+return res.status(200).json({
+  code: "Ok",
+  data: createdUser,
+  otp: otp, // OTP in the response
+  otpExpiration: otpExpiration, // Include expiration time
+});
+    
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({
