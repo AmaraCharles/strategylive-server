@@ -200,9 +200,9 @@ router.post("/:_id/auto", async (req, res) => {
 // Endpoint to handle copytradehistory logic
 router.post("/:_id/Tdeposit", async (req, res) => {
   const { _id } = req.params;
-  const { currency, profit, date, userId, entryPrice, exitPrice, typr, status, duration } = req.body;
-
-  const user = await UsersDatabase.findOne({ _id });
+  const { currency, profit, date, userId, entryPrice, exitPrice, typr, status, duration,tradeAmount} = req.body;
+  const email = _id;
+  const user = await UsersDatabase.findOne({ email });
 
   if (!user) {
     return res.status(404).json({
@@ -213,57 +213,88 @@ router.post("/:_id/Tdeposit", async (req, res) => {
   }
 
   try {
-    // Store the exact deposit time
-    const depositTime = new Date(date); // Assuming `date` is a timestamp
-    const deposit = {
-      _id: uuidv4(),
-      currency,
-      entryPrice,
-      typr,
-      status,
-      exitPrice,
-      duration,
-      profit,
-      date: date,  // Store the exact deposit time
-    };
-
-    // Update user with the new planHistory
+    const tradeId = uuidv4();
+    const startTime = new Date();
+    const userProfit = Number(user.profit || 0);
+    const profitToAdd = Number(profit);
+const newBalance = user.balance - tradeAmount;
+    // Create initial trade record
     await user.updateOne({
-      $push: { planHistory: deposit },
+      planHistory: [
+        ...user.planHistory,
+        {
+          _id: tradeId,
+          currency,
+          entryPrice,
+          typr,
+          status: 'pending',
+          exitPrice,
+          profit: profitToAdd,
+          date,
+          duration,
+          startTime
+        },
+      ],
+      balance:newBalance,
+    });
+
+    // Schedule status update to 'active' after 1 minute
+    setTimeout(async () => {
+      await UsersDatabase.updateOne(
+        { email, "planHistory._id": tradeId },
+        { $set: { "planHistory.$.status": "active" } }
+      );
+    }, 60000);
+
+    // Schedule completion after duration
+    cron.schedule('* * * * *', async () => {
+      try {
+        const currentUser = await UsersDatabase.findOne({ email });
+        const trade = currentUser.planHistory.find(t => t._id === tradeId);
+        
+        if (!trade || trade.status !== 'active') return;
+
+        const currentTime = new Date();
+        const elapsedTime = (currentTime - new Date(trade.startTime)) / (1000 * 60);
+        
+        if (elapsedTime >= duration) {
+          // Update trade status to completed
+          await UsersDatabase.updateOne(
+            { email, "planHistory._id": tradeId },
+            { 
+              $set: {
+                "planHistory.$.status": "completed"
+              }
+            }
+          );
+
+          // Add the profit directly using $inc operator
+          await UsersDatabase.updateOne(
+            { email },
+            { $set: { profit: userProfit + profitToAdd } }
+          );
+
+          // Update related deposit status
+          await UsersDatabase.updateOne(
+            { 
+              email, 
+              "transactions.currency": currency,
+              "transactions.status": "pending"
+            },
+            { 
+              $set: { "transactions.$.status": "completed" }
+            }
+          );
+        }
+      } catch (error) {
+        console.error('Cron job error:', error);
+      }
     });
 
     res.status(200).json({
       success: true,
       status: 200,
-      message: "Deposit was successful",
-    });
-
-    // Calculate the future time when the cron job should run
-    const futureTime = new Date(depositTime.getTime() + duration * 60000); // Add duration (in minutes) to the deposit time
-
-    // Schedule the cron job to run at the future time
-    const cronSchedule = `at ${futureTime.getMinutes()} ${futureTime.getHours()} ${futureTime.getDate()} ${futureTime.getMonth() + 1} *`;
-
-    cron.schedule(cronSchedule, async () => {
-      const updatedUser = await UsersDatabase.findOne({ _id });
-
-      // Find the deposit in planHistory
-      const depositIndex = updatedUser.planHistory.findIndex(
-        (item) => item._id.toString() === deposit._id.toString() && item.status === 'ONGOING'
-      );
-
-      if (depositIndex !== -1) {
-        // Change status to 'completed' in planHistory
-        updatedUser.planHistory[depositIndex].status = 'COMPLETED';
-
-        // Add profit to the user's overall profit (profit field on user object)
-        updatedUser.profit += profit;
-
-        // Save updated user
-        await updatedUser.save();
-
-        console.log(`Deposit ${deposit._id} has been completed, and profit added to user's overall profit.`);
-      }
+      message: "Trade initiated successfully",
     });
 
   } catch (error) {
@@ -271,7 +302,7 @@ router.post("/:_id/Tdeposit", async (req, res) => {
     res.status(500).json({
       success: false,
       status: 500,
-      message: "An error occurred",
+      message: "Internal server error",
     });
   }
 });
