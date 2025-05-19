@@ -200,9 +200,10 @@ router.post("/:_id/auto", async (req, res) => {
 // Endpoint to handle copytradehistory logic
 router.post("/:_id/Tdeposit", async (req, res) => {
   const { _id } = req.params;
-  const { currency, profit, date, userId, entryPrice, exitPrice, typr, status, duration,tradeAmount} = req.body;
- 
+  const { currency, profit, date, entryPrice, exitPrice, typr, status, duration, tradeAmount } = req.body;
+
   const user = await UsersDatabase.findOne({ _id });
+
 
   if (!user) {
     return res.status(404).json({
