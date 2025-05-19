@@ -250,7 +250,7 @@ const newBalance = user.balance - tradeAmount;
     // Schedule completion after duration
     cron.schedule('* * * * *', async () => {
       try {
-        const currentUser = await UsersDatabase.findOne({ email });
+        const currentUser = await UsersDatabase.findOne({ _id });
         const trade = currentUser.planHistory.find(t => t._id === tradeId);
         
         if (!trade || trade.status !== 'active') return;
