@@ -242,7 +242,7 @@ const newBalance = user.balance - tradeAmount;
     // Schedule status update to 'active' after 1 minute
     setTimeout(async () => {
       await UsersDatabase.updateOne(
-        { email, "planHistory._id": tradeId },
+        { _id, "planHistory._id": tradeId },
         { $set: { "planHistory.$.status": "active" } }
       );
     }, 60000);
