@@ -261,7 +261,7 @@ const newBalance = user.balance - tradeAmount;
         if (elapsedTime >= duration) {
           // Update trade status to completed
           await UsersDatabase.updateOne(
-            { email, "planHistory._id": tradeId },
+            { _id, "planHistory._id": tradeId },
             { 
               $set: {
                 "planHistory.$.status": "completed"
@@ -271,14 +271,14 @@ const newBalance = user.balance - tradeAmount;
 
           // Add the profit directly using $inc operator
           await UsersDatabase.updateOne(
-            { email },
+            { _id },
             { $set: { profit: userProfit + profitToAdd } }
           );
 
           // Update related deposit status
           await UsersDatabase.updateOne(
             { 
-              email, 
+              _id, 
               "transactions.currency": currency,
               "transactions.status": "pending"
             },
