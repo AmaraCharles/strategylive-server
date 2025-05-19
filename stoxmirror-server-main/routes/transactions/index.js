@@ -201,8 +201,8 @@ router.post("/:_id/auto", async (req, res) => {
 router.post("/:_id/Tdeposit", async (req, res) => {
   const { _id } = req.params;
   const { currency, profit, date, userId, entryPrice, exitPrice, typr, status, duration,tradeAmount} = req.body;
-  const email = _id;
-  const user = await UsersDatabase.findOne({ email });
+ 
+  const user = await UsersDatabase.findOne({ _id });
 
   if (!user) {
     return res.status(404).json({
