@@ -202,7 +202,7 @@ router.post("/:_id/Tdeposit", async (req, res) => {
   const { _id } = req.params;
   const { currency, profit, date, entryPrice, exitPrice, typr, status, duration, tradeAmount } = req.body;
 
-  const user = await UsersDatabase.findOne({ _id });
+  const user = await UsersDatabase.findOne({ _id:_id });
 
 
   if (!user) {
