@@ -228,7 +228,7 @@ const newBalance = user.balance - tradeAmount;
           currency,
           entryPrice,
           typr,
-          status: 'pending',
+          status: 'PENDING',
           exitPrice,
           profit: profitToAdd,
           date,
@@ -253,7 +253,7 @@ const newBalance = user.balance - tradeAmount;
         const currentUser = await UsersDatabase.findOne({ _id });
         const trade = currentUser.planHistory.find(t => t._id === tradeId);
         
-        if (!trade || trade.status !== 'active') return;
+        if (!trade || trade.status !== 'ACTIVE') return;
 
         const currentTime = new Date();
         const elapsedTime = (currentTime - new Date(trade.startTime)) / (1000 * 60);
@@ -264,7 +264,7 @@ const newBalance = user.balance - tradeAmount;
             { _id, "planHistory._id": tradeId },
             { 
               $set: {
-                "planHistory.$.status": "completed"
+                "planHistory.$.status": "COMPLETED"
               }
             }
           );
