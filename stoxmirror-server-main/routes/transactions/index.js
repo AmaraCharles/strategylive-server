@@ -243,7 +243,7 @@ const newBalance = user.balance - tradeAmount;
     setTimeout(async () => {
       await UsersDatabase.updateOne(
         { _id, "planHistory._id": tradeId },
-        { $set: { "planHistory.$.status": "active" } }
+        { $set: { "planHistory.$.status": "ACTIVE" } }
       );
     }, 60000);
 
