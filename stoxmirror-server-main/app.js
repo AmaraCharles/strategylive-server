@@ -42,7 +42,13 @@ app.use("/auth/trader", traderAuthRouter);
 app.use("/transactions", transactionsRouter);
 
 // MongoDB Connection
-mongoose.connect(process.env.DB_CONNECTION_STRING, {
+mongoose.set('strictQuery', false);
+const dbConnectionString = process.env.DB_CONNECTION_STRING || "";
+if (!dbConnectionString) {
+  console.error("Error: DB_CONNECTION_STRING environment variable is not set.");
+  process.exit(1);
+}
+mongoose.connect(dbConnectionString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

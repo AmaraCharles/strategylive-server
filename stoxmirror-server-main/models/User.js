@@ -66,10 +66,10 @@ const UsersSchema = new mongoose.Schema({
     type: String,
   },
   profit: {
-    type: String,
+    type: Number,
   },
   balance: {
-    type: String,
+    type: Number,
   },
   referalBonus: {
     type: String,
