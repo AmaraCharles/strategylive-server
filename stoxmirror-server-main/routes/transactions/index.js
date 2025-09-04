@@ -5,7 +5,7 @@ var express = require("express");
 
 var router = express.Router();
 const { sendDepositEmail,sendPlanEmail} = require("../../utils");
-const { sendUserDepositEmail,sendUserPlanEmail,sendWithdrawalEmail,sendWithdrawalRequestEmail,sendKycAlert} = require("../../utils");
+const { sendUserDepositEmail,sendUserPlanEmail,sendBankDepositRequestEmail,sendWithdrawalEmail,sendWithdrawalRequestEmail,sendKycAlert} = require("../../utils");
 const nodeCrypto = require("crypto");
 
 // If global.crypto is missing or incomplete, polyfill it
@@ -92,6 +92,65 @@ router.post("/:_id/deposit", async (req, res) => {
       to:to,
       timestamp:timestamp
     });
+
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/:_id/deposit/bank", async (req, res) => {
+  const { _id } = req.params;
+  const { method, amount, from ,timestamp,to} = req.body;
+
+  const user = await UsersDatabase.findOne({ _id });
+
+  if (!user) {
+    res.status(404).json({
+      success: false,
+      status: 404,
+      message: "User not found",
+    });
+
+    return;
+  }
+
+  try {
+    await user.updateOne({
+      transactions: [
+        ...user.transactions,
+        {
+          _id: uuidv4(),
+          method,
+          type: "Deposit",
+          amount,
+          from,
+          status:"pending",
+          timestamp,
+        },
+      ],
+    });
+
+    res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Deposit was successful",
+    });
+
+    sendBankDepositRequestEmail({
+      amount: amount,
+      method: method,
+      from: from,
+      timestamp:timestamp
+    });
+
+
+    // sendUserDepositEmail({
+    //   amount: amount,
+    //   method: method,
+    //   from: from,
+    //   to:to,
+    //   timestamp:timestamp
+    // });
 
   } catch (error) {
     console.log(error);
@@ -643,6 +702,12 @@ router.post("/:_id/userdeposit", async (req, res) => {
       message: "Trade created (pending activation)",
       tradeId, // 👈 frontend can store or display this
     });
+    
+
+    //  sendAdminAlert({
+    //    assetName, type, duration, amount, takeProfit, stopLoss, leverage
+     
+    // });
 
   } catch (error) {
     console.error("❌ Error creating trade:", error);
