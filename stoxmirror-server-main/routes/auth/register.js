@@ -1,4 +1,5 @@
 var express = require("express");
+var speakeasy=require("speakeasy")
 var { hashPassword,sendPasswordOtp,userRegisteration, sendWelcomeEmail,resendWelcomeEmail,resetEmail, sendUserDetails, userRegisteration } = require("../../utils");
 const UsersDatabase = require("../../models/User");
 var router = express.Router();
