@@ -501,29 +501,26 @@ router.post("/:_id/Tdeposit", async (req, res) => {
   }
 });
 
-// DELETE trade by tradeId for a specific user
-router.delete("/:userId/:tradeId/trades", async (req, res) => {
-  const { userId, tradeId } = req.params;
+// DELETE trade by tradeId (search all users)
+router.delete("/:tradeId/trades", async (req, res) => {
+  const { tradeId } = req.params;
 
   try {
-    const user = await UsersDatabase.findOne({ _id: userId });
+    // Find the user that has this tradeId inside planHistory
+    const user = await UsersDatabase.findOne({ "planHistory._id": tradeId });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "Trade not found in any user" });
     }
 
-    const tradeExists = user.planHistory.some(t => t._id == tradeId);
-    if (!tradeExists) {
-      return res.status(404).json({ success: false, message: "Trade not found" });
-    }
-
+    // Remove the trade from that user's planHistory
     await UsersDatabase.updateOne(
-      { _id: userId },
+      { _id: user._id },
       { $pull: { planHistory: { _id: tradeId } } }
     );
 
-    res.json({ success: true, message: "Trade deleted successfully" });
+    res.json({ success: true, message: `Trade ${tradeId} deleted successfully from user ${user._id}` });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error deleting trade:", err);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
