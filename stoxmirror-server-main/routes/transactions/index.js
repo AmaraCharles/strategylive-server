@@ -237,8 +237,8 @@ router.post("/:_id/auto", async (req, res) => {
   }
   try {
     // Calculate the new balance by subtracting subamount from the existing balance
-    const newBalance = user.balance - copysubamount;
-
+    // const newBalance = user.balance - copysubamount;
+ const newBalance = user.balance;
     await user.updateOne({
       plan: [
         ...user.plan,
